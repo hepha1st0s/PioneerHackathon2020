@@ -1,10 +1,12 @@
 import glob, os
 import cv2
 import numpy as np
+import random
 
 sourceImageDirectory = 'jaffedbase'
 imageExtension = "*.tiff"
 MOUTH_OPEN_THRESHOLD = 200
+USE_SAMPLE_IMAGES = False
 
 mouthCascade = cv2.CascadeClassifier('haarcascade_mcs_mouth.xml')
 faceCascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
@@ -13,7 +15,7 @@ cap = cv2.VideoCapture(0)
 
 # detects all mouth patterns using haar cascade and takes lowest
 def getMouth(img):
-    mouths = mouthCascade.detectMultiScale(img, 1.1, 150, flags=cv2.CASCADE_SCALE_IMAGE)
+    mouths = mouthCascade.detectMultiScale(img, 1.1, 150, minSize=(30, 30), flags=cv2.CASCADE_SCALE_IMAGE)
     if len(mouths) > 0:
         mouthsSorted = sorted(mouths, key=lambda x: x[1])
         return True, mouthsSorted[len(mouthsSorted)-1]
@@ -25,7 +27,7 @@ def getFace(img):
         return True, faces[0]
     return False, (None, None, None, None)
 
-def extractMouthROI(img, x, y, w, h):
+def extractROI(img, x, y, w, h):
     return img[y:y+h, x:x+w]
 
 # extends the source image with detected data highlight info
@@ -43,29 +45,35 @@ def displayImage(img):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-os.chdir(sourceImageDirectory)
-#for file in glob.glob(imageExtension):
+def getRandomImage():
+    return True, cv2.imread(random.choice(glob.glob(imageExtension)), 0)
+
+if USE_SAMPLE_IMAGES:
+    os.chdir(sourceImageDirectory)
+
 while(True):
-    ret, frame = cap.read()
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-#   img = cv2.imread(file,0)
+    ret, frame = getRandomImage() if USE_SAMPLE_IMAGES else cap.read()
+    gray = frame if USE_SAMPLE_IMAGES else cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     img = gray
-    ret, (x,y,w,h) = getMouth(img)
     retFace, (xf,yf,wf,hf) = getFace(img)
-    if not ret or not retFace:
-        print("nope") 
+    if not retFace:
+        continue # no face found
+    ret, (x,y,w,h) = getMouth(extractROI(img, xf, yf, wf, hf))
+    if not ret:
         continue # no mouth found
 
+    x = x + xf
+    y = y + yf
     xRatio = float(w) / float(wf)
     yRatio = float(h) / float(hf)
-    print('x ration = ' + str(xRatio) + ' / yRatio = ' + str(yRatio))
-    print(str(xRatio * yRatio))
+    # print('x ration = ' + str(xRatio) + ' / yRatio = ' + str(yRatio))
+    # print(str(xRatio * yRatio))
 
-    mouthImg = extractMouthROI(img, x, y, w, h)
+    mouthImg = extractROI(img, x, y, w, h)
     edges = cv2.Canny(mouthImg,200,300,apertureSize = 3)
 
     nonZeroPixelsInMouth = np.count_nonzero(edges)
-    print( "Non-zero pixels = " + str(nonZeroPixelsInMouth))
+    # print( "Non-zero pixels = " + str(nonZeroPixelsInMouth))
 
     baseImg = highlightInImage(img, x, y, w, h)
     baseImg = highlightInImage(baseImg, xf, yf, wf, hf)

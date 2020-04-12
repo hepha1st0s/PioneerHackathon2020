@@ -9,6 +9,8 @@ MOUTH_OPEN_THRESHOLD = 200
 mouthCascade = cv2.CascadeClassifier('haarcascade_mcs_mouth.xml')
 faceCascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
 
+cap = cv2.VideoCapture(0)
+
 # detects all mouth patterns using haar cascade and takes lowest
 def getMouth(img):
     mouths = mouthCascade.detectMultiScale(img, 1.1, 150, flags=cv2.CASCADE_SCALE_IMAGE)
@@ -42,27 +44,34 @@ def displayImage(img):
     cv2.destroyAllWindows()
 
 os.chdir(sourceImageDirectory)
-for file in glob.glob(imageExtension):
-    img = cv2.imread(file,0)
+#for file in glob.glob(imageExtension):
+while(True):
+    ret, frame = cap.read()
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+#   img = cv2.imread(file,0)
+    img = gray
     ret, (x,y,w,h) = getMouth(img)
     retFace, (xf,yf,wf,hf) = getFace(img)
     if not ret or not retFace:
-        print "nope"
+        print("nope") 
         continue # no mouth found
 
     xRatio = float(w) / float(wf)
     yRatio = float(h) / float(hf)
-    print 'x ration = ' + str(xRatio) + ' / yRatio = ' + str(yRatio)
-    print str(xRatio * yRatio)
+    print('x ration = ' + str(xRatio) + ' / yRatio = ' + str(yRatio))
+    print(str(xRatio * yRatio))
 
     mouthImg = extractMouthROI(img, x, y, w, h)
     edges = cv2.Canny(mouthImg,200,300,apertureSize = 3)
 
     nonZeroPixelsInMouth = np.count_nonzero(edges)
-    print "Non-zero pixels = " + str(nonZeroPixelsInMouth)
+    print( "Non-zero pixels = " + str(nonZeroPixelsInMouth))
 
     baseImg = highlightInImage(img, x, y, w, h)
     baseImg = highlightInImage(baseImg, xf, yf, wf, hf)
     baseImg = cv2.putText(baseImg, 'Mouth open' if nonZeroPixelsInMouth > MOUTH_OPEN_THRESHOLD else 'Mouth shut', (80, 50), cv2.FONT_HERSHEY_SIMPLEX , .5, (255, 0, 0) , 1, cv2.LINE_AA)
 
-    displayImage(embedImage(baseImg, edges))
+    #displayImage(embedImage(baseImg, edges))
+    cv2.imshow('frame',embedImage(baseImg, edges))
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break

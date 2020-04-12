@@ -23,6 +23,8 @@ The solution can work with either test images or a live video feed. The algorith
 ## Demo Results
 To demo the result we have decided to go for a dataset representing [Japanese Female Facial Expressions from 1989](https://zenodo.org/record/3451524#.XpLwZ1MzYkg). We have decided for this dataset as it was quick to download and free to use in publications when cited (so we should be safe now...).
 
+
+
 | Input        | Output           |
 | ------------- |:-------------:| -----:|
 |![input image](Results/test10_base.jpg?raw=true "")| ![result image](Results/test10_result.jpg?raw=true "")|

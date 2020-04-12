@@ -17,8 +17,17 @@ The solution can work with either test images or a live video feed. The algorith
 
 
 ## Dependencies
-[Python](https://www.python.org/)
+[Python](https://www.python.org/) -
 [OpenCV for Python](https://opencv.org/)
 
 ## Demo Results
 To demo the result we have decided to go for a dataset representing [Japanese Female Facial Expressions from 1989](https://zenodo.org/record/3451524#.XpLwZ1MzYkg). We have decided for this dataset as it was quick to download and free to use in publications when cited (so we should be safe now...).
+
+| Input        | Output           |
+| ------------- |:-------------:| -----:|
+|![input image](Results/test10_base.jpg?raw=true "")| ![result image](Results/test10_result.jpg?raw=true "")|
+|![input image](Results/test20_base.jpg?raw=true "")| ![result image](Results/test20_result.jpg?raw=true "")|
+|![input image](Results/test2_base.jpg?raw=true "")| ![result image](Results/test2_result.jpg?raw=true "")|
+|![input image](Results/test4_base.jpg?raw=true "")| ![result image](Results/test4_result.jpg?raw=true "")|
+|![input image](Results/test5_base.jpg?raw=true "")| ![result image](Results/test5_result.jpg?raw=true "")|
+|![input image](Results/test7_base.jpg?raw=true "")| ![result image](Results/test7_result.jpg?raw=true "")|
